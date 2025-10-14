@@ -5,13 +5,13 @@ import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Check } from '@/components/ui/check';
-import { WalletButton, WalletStatus } from '@/components/wallet/wallet-button';
 import { useWallet } from '@/contexts/wallet-context';
 import { validatePDFFile } from '@/lib/pdf-utils';
 import { getBackendApiUrl } from '@/lib/api-config';
 
 export default function CandidatePage() {
   const { isConnected } = useWallet();
+  const [email, setEmail] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,18 +62,18 @@ export default function CandidatePage() {
   };
 
   const processAndSendPDF = async () => {
-    if (!selectedFile || !isConnected) return;
+    if (!selectedFile || !isConnected || !email) return;
 
     setIsProcessing(true);
     setError(null);
 
     try {
-      // Crear FormData para enviar el archivo
+      // Create FormData to send file and email
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('fileName', selectedFile.name);
+      formData.append('email', email);
 
-      // Enviar al backend para interpretación AI
+      // Send to backend for AI interpretation and credential creation
       const apiUrl = getBackendApiUrl('/api/ai-interpret');
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -88,8 +88,9 @@ export default function CandidatePage() {
       const result = await response.json();
       console.log('AI Interpretation result:', result);
       
-      // TODO: Mostrar resultados o navegar a siguiente paso
-      alert('Report processed successfully! Check console for results.');
+      // Navigate to results page with data
+      const dataParam = encodeURIComponent(JSON.stringify(result));
+      window.location.href = `/candidate/results?data=${dataParam}`;
       
     } catch (err: any) {
       console.error('Error processing PDF:', err);
@@ -101,7 +102,7 @@ export default function CandidatePage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <Header />
+      <Header showNavLinks={false} showCTAButtons={false} showWalletButton={true} />
       
       <main className="mx-auto max-w-4xl px-6 py-16">
         <div className="text-center mb-12">
@@ -111,12 +112,7 @@ export default function CandidatePage() {
           <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-6">
             Upload your existing psychological assessment results or take our quick tests to create a verifiable, portable credential.
           </p>
-          <div className="flex justify-center">
-            <WalletButton />
-          </div>
         </div>
-
-        <WalletStatus />
 
         <div className="grid gap-8 md:grid-cols-2 mb-12">
           <div className="rounded-3xl border border-slate-200 p-8">
@@ -124,6 +120,22 @@ export default function CandidatePage() {
             <p className="text-slate-600 mb-6">
               Have you already taken psychological assessments? Upload your results and we'll create a credential from them.
             </p>
+            
+            {/* Email Input */}
+            <div className="mb-4">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+                Your Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="candidate@example.com"
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none"
+                disabled={!isConnected || isProcessing}
+              />
+            </div>
             
             <input
               ref={fileInputRef}
@@ -168,13 +180,13 @@ export default function CandidatePage() {
 
             <Button 
               className={`w-full mt-4 ${
-                !isConnected || !selectedFile || isProcessing 
+                !isConnected || !selectedFile || !email || isProcessing 
                   ? 'opacity-50 cursor-not-allowed' 
                   : ''
               }`}
-              onClick={isConnected && selectedFile && !isProcessing ? processAndSendPDF : undefined}
+              onClick={isConnected && selectedFile && email && !isProcessing ? processAndSendPDF : undefined}
             >
-              {isProcessing ? 'Processing...' : selectedFile ? 'Process Report' : 'Upload Report'}
+              {isProcessing ? 'Processing...' : selectedFile && email ? 'Process Report' : 'Complete Form'}
             </Button>
           </div>
 

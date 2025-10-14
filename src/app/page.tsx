@@ -10,7 +10,7 @@ import { CTA } from '@/components/sections/cta';
 export default function Home() {
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      <Header />
+      <Header showNavLinks={true} showCTAButtons={true} showWalletButton={false} />
       <Hero />
       <Benefits />
       <HowItWorks />

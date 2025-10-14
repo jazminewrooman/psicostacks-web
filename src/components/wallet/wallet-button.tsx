@@ -47,21 +47,4 @@ export function WalletButton() {
 export function WalletStatus() {
   const { isConnected, stxAddress, stxBalance } = useWallet();
 
-  if (!isConnected) {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 mb-6">
-        <p className="text-sm text-amber-800">
-          <strong>⚠️ Wallet not connected.</strong> Please connect your Stacks wallet to continue.
-        </p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-2xl border border-green-200 bg-green-50 p-4 mb-6">
-      <p className="text-sm text-green-800">
-        <strong>✓ Wallet connected</strong>
-      </p>
-    </div>
-  );
 }
