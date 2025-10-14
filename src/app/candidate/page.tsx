@@ -1,10 +1,104 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useRef } from 'react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Check } from '@/components/ui/check';
+import { WalletButton, WalletStatus } from '@/components/wallet/wallet-button';
+import { useWallet } from '@/contexts/wallet-context';
+import { validatePDFFile } from '@/lib/pdf-utils';
+import { getBackendApiUrl } from '@/lib/api-config';
 
 export default function CandidatePage() {
+  const { isConnected } = useWallet();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (file: File) => {
+    setError(null);
+    try {
+      validatePDFFile(file);
+      setSelectedFile(file);
+    } catch (err: any) {
+      setError(err.message);
+      setSelectedFile(null);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  };
+
+  const handleUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const processAndSendPDF = async () => {
+    if (!selectedFile || !isConnected) return;
+
+    setIsProcessing(true);
+    setError(null);
+
+    try {
+      // Crear FormData para enviar el archivo
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('fileName', selectedFile.name);
+
+      // Enviar al backend para interpretación AI
+      const apiUrl = getBackendApiUrl('/api/ai-interpret');
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to process the report');
+      }
+
+      const result = await response.json();
+      console.log('AI Interpretation result:', result);
+      
+      // TODO: Mostrar resultados o navegar a siguiente paso
+      alert('Report processed successfully! Check console for results.');
+      
+    } catch (err: any) {
+      console.error('Error processing PDF:', err);
+      setError(err.message || 'An error occurred while processing the PDF');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <Header />
@@ -14,10 +108,15 @@ export default function CandidatePage() {
           <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tight text-slate-900 mb-4">
             Create Your <span className="text-violet-600">Portable Credential</span>
           </h1>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-6">
             Upload your existing psychological assessment results or take our quick tests to create a verifiable, portable credential.
           </p>
+          <div className="flex justify-center">
+            <WalletButton />
+          </div>
         </div>
+
+        <WalletStatus />
 
         <div className="grid gap-8 md:grid-cols-2 mb-12">
           <div className="rounded-3xl border border-slate-200 p-8">
@@ -25,11 +124,58 @@ export default function CandidatePage() {
             <p className="text-slate-600 mb-6">
               Have you already taken psychological assessments? Upload your results and we'll create a credential from them.
             </p>
-            <div className="border-2 border-dashed border-slate-300 rounded-2xl p-8 text-center">
-              <div className="text-slate-400 mb-2">📄</div>
-              <p className="text-sm text-slate-500">Drag & drop your PDF or click to browse</p>
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={!isConnected || isProcessing}
+            />
+            
+            <div 
+              className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
+                isDragging 
+                  ? 'border-violet-600 bg-violet-50' 
+                  : selectedFile 
+                    ? 'border-green-500 bg-green-50'
+                    : 'border-slate-300 hover:border-violet-400'
+              } ${!isConnected || isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={isConnected && !isProcessing ? handleUploadClick : undefined}
+            >
+              <div className="text-4xl mb-2">
+                {selectedFile ? '✅' : '📄'}
+              </div>
+              <p className="text-sm text-slate-700 font-medium">
+                {selectedFile ? selectedFile.name : 'Drag & drop your PDF or click to browse'}
+              </p>
+              {selectedFile && (
+                <p className="text-xs text-slate-500 mt-1">
+                  {(selectedFile.size / 1024).toFixed(2)} KB
+                </p>
+              )}
             </div>
-            <Button href="#" className="w-full mt-4">Upload Report</Button>
+
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
+
+            <Button 
+              className={`w-full mt-4 ${
+                !isConnected || !selectedFile || isProcessing 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : ''
+              }`}
+              onClick={isConnected && selectedFile && !isProcessing ? processAndSendPDF : undefined}
+            >
+              {isProcessing ? 'Processing...' : selectedFile ? 'Process Report' : 'Upload Report'}
+            </Button>
           </div>
 
           <div className="rounded-3xl border border-slate-200 p-8">
@@ -51,7 +197,13 @@ export default function CandidatePage() {
                 <span className="text-sm text-slate-700">Work style preferences</span>
               </div>
             </div>
-            <Button href="#" className="w-full">Start Assessment</Button>
+            <Button 
+              href={isConnected ? "#" : undefined}
+              className={`w-full ${!isConnected ? 'opacity-50 cursor-not-allowed' : ''}`}
+              onClick={!isConnected ? (e: any) => e.preventDefault() : undefined}
+            >
+              Start Assessment
+            </Button>
           </div>
         </div>
 

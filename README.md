@@ -7,6 +7,7 @@ A Next.js application for verifying hiring credentials using blockchain and AI t
 - **Mobile-first responsive design** with Tailwind CSS
 - **Portable credentials** that can be shared across multiple employers
 - **AI-generated insights** from psychological assessments
+- **PDF upload support** - upload existing psychometric reports
 - **Blockchain verification** with Bitcoin anchoring
 - **Privacy-focused** - no personal data stored on-chain
 - **One-time QR codes** for secure credential sharing
@@ -26,12 +27,21 @@ A Next.js application for verifying hiring credentials using blockchain and AI t
 npm install
 ```
 
-2. Run the development server:
+2. Configure environment variables:
+```bash
+cp .env.local.example .env.local
+```
+
+Edit `.env.local` and set the backend URL (default: `http://localhost:3001`).
+
+3. Run the development server:
 ```bash
 npm run dev
 ```
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+**Note**: Make sure the backend (`psicostacks-backend`) is running on the configured port before uploading reports.
 
 ## Project Structure
 

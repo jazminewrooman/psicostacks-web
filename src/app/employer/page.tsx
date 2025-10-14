@@ -1,10 +1,15 @@
+'use client';
+
 import React from 'react';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
 import { Button } from '@/components/ui/button';
 import { Check } from '@/components/ui/check';
+import { WalletButton, WalletStatus } from '@/components/wallet/wallet-button';
+import { useWallet } from '@/contexts/wallet-context';
 
 export default function EmployerPage() {
+  const { isConnected } = useWallet();
   return (
     <div className="min-h-screen bg-white text-slate-900">
       <Header />
@@ -14,10 +19,15 @@ export default function EmployerPage() {
           <h1 className="text-4xl md:text-5xl font-black leading-tight tracking-tight text-slate-900 mb-4">
             Verify Candidates in <span className="text-violet-600">Seconds</span>
           </h1>
-          <p className="text-slate-600 text-lg max-w-2xl mx-auto">
+          <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-6">
             Scan a QR code, pay a small verification fee, and get AI-generated insights about candidates in under 60 seconds.
           </p>
+          <div className="flex justify-center">
+            <WalletButton />
+          </div>
         </div>
+
+        <WalletStatus />
 
         <div className="rounded-3xl border border-slate-200 p-8 mb-12">
           <h2 className="text-2xl font-bold text-slate-900 mb-6">Scan QR Code</h2>
@@ -107,7 +117,11 @@ export default function EmployerPage() {
           <p className="text-slate-600 mb-6">
             No setup required. Just scan QR codes when candidates share them with you.
           </p>
-          <Button href="#" className="bg-violet-600 hover:bg-violet-700">
+          <Button 
+            href={isConnected ? "#" : undefined}
+            className={`bg-violet-600 hover:bg-violet-700 ${!isConnected ? 'opacity-50 cursor-not-allowed' : ''}`}
+            onClick={!isConnected ? (e: any) => e.preventDefault() : undefined}
+          >
             Demo Verification
           </Button>
         </div>
