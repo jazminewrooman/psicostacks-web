@@ -101,6 +101,10 @@ export default function ResultsPage() {
 
       console.log('Mint result:', mintResult);
 
+      // Note: credentialId will be null until transaction confirms
+      // For MVP, we use a placeholder (0) and update it later when tx confirms
+      const blockchainId = mintResult.credentialId || 0;
+
       // Update backend with blockchain details
       const updateUrl = getBackendApiUrl(`/api/credentials/${resultData.credential.id}/mint`);
       const response = await fetch(updateUrl, {
@@ -109,7 +113,7 @@ export default function ResultsPage() {
         body: JSON.stringify({
           sbtId: mintResult.txId,
           txId: mintResult.txId,
-          blockchainId: mintResult.credentialId,
+          blockchainId: blockchainId,
         }),
       });
 

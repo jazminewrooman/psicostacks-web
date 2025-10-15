@@ -106,8 +106,8 @@ export async function getCredentialDetails(credentialId: number) {
 }
 
 /**
- * Revokes a credential (can only be called by issuer or owner)
- * @param credentialId The on-chain credential ID to revoke
+ * Revokes a credential on-chain
+ * @param credentialId The on-chain credential ID
  */
 export async function revokeCredential(credentialId: number): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -122,11 +122,41 @@ export async function revokeCredential(credentialId: number): Promise<string> {
         icon: window.location.origin + '/psicostacks-logo.png',
       },
       onFinish: (data) => {
-        console.log('Revoke transaction:', data.txId);
+        console.log('Revoke transaction:', data);
         resolve(data.txId);
       },
       onCancel: () => {
-        reject(new Error('Revoke transaction was cancelled'));
+        reject(new Error('Transaction cancelled by user'));
+      },
+    });
+  });
+}
+
+/**
+ * Pays verification fee and verifies a credential on-chain
+ * @param blockchainId The on-chain credential ID (blockchain_id from DB)
+ * @returns Transaction ID
+ */
+export async function payVerificationFee(blockchainId: number): Promise<string> {
+  console.log('Paying verification fee for blockchain ID:', blockchainId);
+
+  return new Promise((resolve, reject) => {
+    openContractCall({
+      network: NETWORK,
+      contractAddress: CONTRACT_ADDRESS,
+      contractName: CONTRACT_NAME,
+      functionName: 'verify-paid',
+      functionArgs: [uintCV(blockchainId)],
+      appDetails: {
+        name: 'PsicoStacks',
+        icon: window.location.origin + '/psicostacks-logo.png',
+      },
+      onFinish: (data) => {
+        console.log('Verification payment transaction:', data);
+        resolve(data.txId);
+      },
+      onCancel: () => {
+        reject(new Error('Payment cancelled by user'));
       },
     });
   });

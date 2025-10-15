@@ -33,9 +33,10 @@ export default function CredentialPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [verifyToken, setVerifyToken] = useState<string | null>(null);
+  const [verifyUrl, setVerifyUrl] = useState<string>('');
 
   const credentialId = params.id as string;
-  const verifyUrl = `${window.location.origin}/verify/${credentialId}`;
 
   useEffect(() => {
     fetchCredential();
@@ -43,6 +44,7 @@ export default function CredentialPage() {
 
   const fetchCredential = async () => {
     try {
+      // Fetch credential details
       const apiUrl = getBackendApiUrl(`/api/credentials/${credentialId}`);
       const response = await fetch(apiUrl);
 
@@ -52,6 +54,23 @@ export default function CredentialPage() {
 
       const data = await response.json();
       setCredential(data);
+
+      // Generate verify token for QR code (valid for 2 hours)
+      const shareUrl = getBackendApiUrl('/api/share');
+      const shareResponse = await fetch(shareUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credentialId: credentialId,
+          ttlSec: 7200, // 2 hours
+        }),
+      });
+
+      if (shareResponse.ok) {
+        const shareData = await shareResponse.json();
+        setVerifyToken(shareData.token);
+        setVerifyUrl(shareData.url);
+      }
     } catch (err: any) {
       console.error('Error fetching credential:', err);
       setError(err.message || 'Failed to load credential');
