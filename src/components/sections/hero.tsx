@@ -32,8 +32,8 @@ export const Hero: React.FC = () => (
             AI makes results understandable; Bitcoin makes them provable and revocable. Share via one-time QR. Employers pay a small fee to verify.
           </p>
           <div className="mt-6 flex flex-col sm:flex-row gap-3">
-            <Button href="#candidate">I'm a Candidate</Button>
-            <Button href="#employer" variant="outline">I'm an Employer</Button>
+            <Button href="#candidate">I&apos;m a Candidate</Button>
+            <Button href="#employer" variant="outline">I&apos;m an Employer</Button>
           </div>
           <p className="mt-3 text-xs text-violet-200">No retesting. No PDFs. Just portable, verifiable credentials.</p>
         </div>

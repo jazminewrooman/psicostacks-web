@@ -38,8 +38,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="hidden md:flex items-center gap-3">
         {showCTAButtons && (
           <>
-            <Button href="#candidate">I'm a Candidate</Button>
-            <Button href="#employer" variant="outline">I'm an Employer</Button>
+            <Button href="#candidate">I&apos;m a Candidate</Button>
+            <Button href="#employer" variant="outline">I&apos;m an Employer</Button>
           </>
         )}
         

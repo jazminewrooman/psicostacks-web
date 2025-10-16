@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -20,7 +20,7 @@ interface CredentialPreview {
   note?: string;
 }
 
-export default function VerifyPage() {
+function VerifyPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isConnected, stxAddress } = useWallet();
@@ -194,7 +194,7 @@ export default function VerifyPage() {
               <div>
                 <h3 className="font-semibold text-slate-900">60-Second Access</h3>
                 <p className="text-slate-600 text-sm">
-                  You'll get 60 seconds to review the AI-generated summary and full report
+                  You&apos;ll get 60 seconds to review the AI-generated summary and full report
                 </p>
               </div>
             </div>
@@ -309,7 +309,7 @@ export default function VerifyPage() {
         <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-6">
           <h3 className="font-semibold text-slate-900 mb-2">🔒 Privacy & Security</h3>
           <ul className="text-sm text-slate-600 space-y-2">
-            <li>• The candidate's full report is encrypted and stored securely</li>
+            <li>• The candidate&apos;s full report is encrypted and stored securely</li>
             <li>• Your access is logged for audit purposes</li>
             <li>• The verification token expires after one use</li>
             <li>• View tokens are valid for only 60 seconds</li>
@@ -319,5 +319,24 @@ export default function VerifyPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white text-slate-900">
+        <Header showNavLinks={false} showCTAButtons={false} showWalletButton={true} />
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+            <p className="text-slate-600">Loading credential...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    }>
+      <VerifyPageContent />
+    </Suspense>
   );
 }

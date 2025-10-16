@@ -140,7 +140,7 @@ export default function CandidatePage() {
           <div className="rounded-3xl border border-slate-200 p-8">
             <h3 className="text-xl font-bold text-slate-900 mb-4">Upload Existing Report</h3>
             <p className="text-slate-600 mb-6">
-              Have you already taken psychological assessments? Upload your results and we'll create a credential from them.
+              Have you already taken psychological assessments? Upload your results and we&apos;ll create a credential from them.
             </p>
             
             {/* Wallet Connected Notice */}
@@ -208,7 +208,7 @@ export default function CandidatePage() {
           <div className="rounded-3xl border border-slate-200 p-8">
             <h3 className="text-xl font-bold text-slate-900 mb-4">Take Quick Tests</h3>
             <p className="text-slate-600 mb-6">
-              Don't have existing results? Take our streamlined psychological assessments (15-30 minutes).
+              Don&apos;t have existing results? Take our streamlined psychological assessments (15-30 minutes).
             </p>
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3">

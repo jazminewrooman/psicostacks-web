@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -25,7 +25,7 @@ interface ResultData {
   };
 }
 
-export default function ResultsPage() {
+function ResultsPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { stxAddress, isConnected } = useWallet();
@@ -314,5 +314,24 @@ export default function ResultsPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function ResultsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white text-slate-900">
+        <Header showNavLinks={false} showCTAButtons={false} showWalletButton={true} />
+        <div className="flex items-center justify-center py-32">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+            <p className="text-slate-600">Processing your results...</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    }>
+      <ResultsPageContent />
+    </Suspense>
   );
 }

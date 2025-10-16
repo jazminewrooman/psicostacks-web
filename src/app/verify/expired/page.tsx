@@ -20,7 +20,7 @@ export default function ExpiredPage() {
         </h1>
         <p className="text-slate-600 text-lg mb-8 max-w-2xl mx-auto">
           Your 60-second viewing window has expired. To view the credential again, 
-          you'll need to scan the QR code and pay the verification fee again.
+          you&apos;ll need to scan the QR code and pay the verification fee again.
         </p>
 
         <div className="rounded-3xl border border-slate-200 bg-slate-50 p-8 mb-8 max-w-2xl mx-auto">

@@ -48,7 +48,7 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
               <div className="text-2xl mb-2">🔒</div>
               <h4 className="font-semibold text-blue-900 mb-1">Secure</h4>
               <p className="text-sm text-blue-800">
-                Inherits Bitcoin's security - the most secure blockchain
+                Inherits Bitcoin&apos;s security - the most secure blockchain
               </p>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -92,7 +92,7 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
               <li className="flex gap-3">
                 <span className="flex-shrink-0 w-6 h-6 bg-violet-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
                 <div>
-                  <p className="font-medium">Visit Leather's website</p>
+                  <p className="font-medium">Visit Leather&apos;s website</p>
                   <a 
                     href="https://leather.io" 
                     target="_blank" 
@@ -205,10 +205,10 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
       content: (
         <div className="space-y-4">
           <p className="text-slate-700">
-            You've received a <strong>verifiable credential link</strong> from a candidate. Here's what you need to know:
+            You&apos;ve received a <strong>verifiable credential link</strong> from a candidate. Here&apos;s what you need to know:
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-semibold text-blue-900 mb-2">✨ What you'll get:</h4>
+            <h4 className="font-semibold text-blue-900 mb-2">✨ What you&apos;ll get:</h4>
             <ul className="space-y-2 text-sm text-blue-800">
               <li>• Verified psychometric assessment results</li>
               <li>• Blockchain-verified authenticity</li>
@@ -226,7 +226,7 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
       content: (
         <div className="space-y-4">
           <p className="text-slate-700">
-            This credential is stored on the <strong>Stacks blockchain</strong>, which means it's:
+            This credential is stored on the <strong>Stacks blockchain</strong>, which means it&apos;s:
           </p>
           <div className="grid md:grid-cols-2 gap-4">
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -339,7 +339,7 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
       content: (
         <div className="space-y-4">
           <p className="text-slate-700">
-            Perfect! You're all set to verify blockchain credentials.
+            Perfect! You&apos;re all set to verify blockchain credentials.
           </p>
           
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-6">
@@ -349,7 +349,7 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
                 <span className="text-2xl">👀</span>
                 <div>
                   <p className="font-medium">Preview credential (FREE)</p>
-                  <p className="text-xs text-slate-600">See candidate's assessment band and basic insights</p>
+                  <p className="text-xs text-slate-600">See candidate&apos;s assessment band and basic insights</p>
                 </div>
               </li>
               <li className="flex gap-3">
@@ -378,7 +378,7 @@ export function WalletOnboarding({ userType, onComplete, onSkip }: WalletOnboard
 
           <div className="bg-green-50 border border-green-200 rounded-lg p-4">
             <p className="text-sm text-green-900">
-              <strong>🔒 Privacy Note:</strong> Your verification is logged on-chain for audit purposes, but the candidate's full data remains encrypted and private.
+              <strong>🔒 Privacy Note:</strong> Your verification is logged on-chain for audit purposes, but the candidate&apos;s full data remains encrypted and private.
             </p>
           </div>
         </div>

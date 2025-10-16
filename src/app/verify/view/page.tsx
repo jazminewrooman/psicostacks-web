@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Footer } from '@/components/layout/footer';
@@ -15,7 +15,7 @@ interface ViewData {
   note?: string; // Optional note if report is unavailable
 }
 
-export default function VerifyViewPage() {
+function VerifyViewContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [data, setData] = useState<ViewData | null>(null);
@@ -139,7 +139,7 @@ export default function VerifyViewPage() {
             ⏱️ Time Remaining: {formatTime(timeLeft)}
           </p>
           <p className="text-xs text-slate-600 mt-1">
-            This credential will expire and you'll need to request access again
+            This credential will expire and you&apos;ll need to request access again
           </p>
         </div>
 
@@ -237,5 +237,20 @@ export default function VerifyViewPage() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function VerifyViewPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white text-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-violet-600 mx-auto mb-4"></div>
+          <p className="text-slate-600">Loading...</p>
+        </div>
+      </div>
+    }>
+      <VerifyViewContent />
+    </Suspense>
   );
 }

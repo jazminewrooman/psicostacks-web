@@ -54,8 +54,8 @@ export const MobileMenu: React.FC = () => {
               </a>
             </nav>
             <div className="pt-4 border-t border-slate-100 space-y-3">
-              <Button href="#candidate" className="w-full">I'm a Candidate</Button>
-              <Button href="#employer" variant="outline" className="w-full">I'm an Employer</Button>
+              <Button href="#candidate" className="w-full">I&apos;m a Candidate</Button>
+              <Button href="#employer" variant="outline" className="w-full">I&apos;m an Employer</Button>
             </div>
           </div>
         </div>

@@ -7,6 +7,12 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38bdf8)](https://tailwindcss.com/)
 [![Stacks](https://img.shields.io/badge/Stacks-Blockchain-5546ff)](https://www.stacks.co/)
 
+🌐 **Live App:** [https://psicostacks.netlify.app/](https://psicostacks.netlify.app/)
+
+**Related Repositories:**
+- 🔧 [Backend API](https://github.com/jazminewrooman/psicostacks-backend)
+- ⛓️ [Smart Contracts](https://github.com/jazminewrooman/psicostacks-smarts)
+
 ## 📋 Table of Contents
 
 - [Overview](#overview)
@@ -44,7 +50,7 @@
 
 ### For Candidates
 - 📤 **Upload psychometric test results** (PDF)
-- 🤖 **AI-powered credential generation** (OpenAI GPT-4)
+- 🤖 **AI-powered credential generation** (Mistral AI)
 - ⛓️ **Mint credentials as SBTs** on Stacks blockchain
 - 📤 **Generate unlimited shareable links** (2-hour expiry)
 - 🔒 **Revoke credentials** anytime
@@ -90,8 +96,8 @@
          │
          ▼
 ┌─────────────────┐
-│   OpenAI API    │
-│   (GPT-4)       │
+│   Mistral AI    │
+│   API           │
 └─────────────────┘
 ```
 

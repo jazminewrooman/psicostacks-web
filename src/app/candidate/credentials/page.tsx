@@ -174,7 +174,7 @@ export default function MyCredentialsPage() {
         <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 mb-8">
           <h3 className="font-semibold text-slate-900 mb-2">📤 How Sharing Works</h3>
           <ul className="text-sm text-slate-700 space-y-1">
-            <li>• Click <strong>"📤 Share"</strong> to generate a unique verification link</li>
+            <li>• Click <strong>&ldquo;📤 Share&rdquo;</strong> to generate a unique verification link</li>
             <li>• Each link is valid for <strong>2 hours</strong> and can be shared with any employer</li>
             <li>• You can generate <strong>unlimited links</strong> - share with as many employers as you want</li>
             <li>• Your credential stays active until you choose to revoke it</li>

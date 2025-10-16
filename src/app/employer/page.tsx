@@ -28,7 +28,7 @@ export default function EmployerPage() {
           <div className="grid gap-8 md:grid-cols-2 items-center">
             <div>
               <p className="text-slate-600 mb-6">
-                When a candidate shares their PsicoStacks credential, you'll receive a QR code. 
+                When a candidate shares their PsicoStacks credential, you&apos;ll receive a QR code. 
                 Scan it to access their verified psychological assessment results.
               </p>
               <div className="space-y-4">
@@ -62,7 +62,7 @@ export default function EmployerPage() {
                 <Check stroke="#16a34a" className="shrink-0 mt-0.5" />
                 <div>
                   <h4 className="font-semibold text-slate-900">AI-Generated Summary</h4>
-                  <p className="text-sm text-slate-600">Clear, role-aligned insights about the candidate's psychological profile</p>
+                  <p className="text-sm text-slate-600">Clear, role-aligned insights about the candidate&apos;s psychological profile</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">

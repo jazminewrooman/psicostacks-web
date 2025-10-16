@@ -98,7 +98,7 @@ export default function AdminPanel() {
       <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
         <p className="text-xs text-yellow-800">
           <strong>⚠️ Important:</strong> This transaction will only succeed if you are the contract owner.
-          Make sure you're connected with the wallet that deployed the contract.
+          Make sure you&apos;re connected with the wallet that deployed the contract.
         </p>
       </div>
     </div>
