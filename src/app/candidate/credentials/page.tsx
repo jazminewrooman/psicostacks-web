@@ -10,8 +10,8 @@ import { Button } from '@/components/ui/button';
 
 interface Credential {
   id: string;
-  blockchain_id: number;
-  sbt_id: string;
+  blockchain_id: number | null;
+  sbt_id: string | null;
   status: 'pending' | 'minted' | 'revoked';
   summary: {
     band: string;
@@ -38,11 +38,7 @@ export default function MyCredentialsPage() {
     if (!stxAddress) return;
     
     try {
-      // TODO: In production, use wallet signature to verify ownership
-      // For now, using stxAddress as email identifier (temporary)
-      const email = `${stxAddress}@stacks`; // Placeholder - should use actual candidate email
-      
-      const response = await fetch(getBackendApiUrl(`/api/credentials/mine?email=${encodeURIComponent(email)}`));
+      const response = await fetch(getBackendApiUrl(`/api/credentials/mine?wallet=${encodeURIComponent(stxAddress)}`));
       
       if (!response.ok) {
         throw new Error('Failed to fetch credentials');
@@ -57,7 +53,13 @@ export default function MyCredentialsPage() {
     }
   };
 
-  const handleRevoke = async (credentialId: string, blockchainId: number) => {
+  const handleRevoke = async (credentialId: string, blockchainId: number | null) => {
+    // Validation: blockchain_id must exist (can be 0, so check for null explicitly)
+    if (blockchainId === null || blockchainId === undefined) {
+      alert('This credential is not yet minted on the blockchain. Cannot revoke pending credentials.');
+      return;
+    }
+
     if (!confirm('Are you sure you want to revoke this credential? This action cannot be undone.')) {
       return;
     }
@@ -65,6 +67,8 @@ export default function MyCredentialsPage() {
     setRevoking(credentialId);
 
     try {
+      console.log('Revoking credential:', { credentialId, blockchainId });
+      
       // Step 1: Call blockchain to revoke
       const txId = await revokeCredential(blockchainId);
       console.log('Revoke transaction:', txId);
@@ -77,16 +81,30 @@ export default function MyCredentialsPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to update credential status');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to update credential status');
       }
 
-      alert('Credential revoked successfully! Transaction: ' + txId);
+      alert('Credential revoked successfully!\n\nTransaction: ' + txId + '\n\nIt may take a few minutes to confirm on the blockchain.');
       
       // Refresh list
       await fetchMyCredentials();
     } catch (error: any) {
-      console.error('Error revoking:', error);
-      alert('Failed to revoke credential: ' + error.message);
+      console.error('Error revoking credential:', error);
+      
+      // Better error messages
+      let errorMessage = error.message;
+      if (errorMessage.includes('cancelled')) {
+        errorMessage = 'Transaction was cancelled';
+      } else if (errorMessage.includes('ERR-NOT-AUTH')) {
+        errorMessage = 'You are not authorized to revoke this credential. Only the owner can revoke.';
+      } else if (errorMessage.includes('ERR-ALREADY-REVOKED')) {
+        errorMessage = 'This credential has already been revoked';
+      } else if (errorMessage.includes('ERR-NOT-FOUND')) {
+        errorMessage = 'Credential not found on blockchain. It may not be minted yet.';
+      }
+      
+      alert('Failed to revoke credential:\n\n' + errorMessage);
     } finally {
       setRevoking(null);
     }
@@ -95,7 +113,7 @@ export default function MyCredentialsPage() {
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-white">
-        <Header showNavLinks showCTAButtons showWalletButton />
+        <Header showNavLinks={false} showCTAButtons={false} showWalletButton />
         <main className="max-w-4xl mx-auto px-6 py-16 text-center">
           <h1 className="text-3xl font-bold mb-4">My Credentials</h1>
           <p className="text-slate-600 mb-8">Please connect your wallet to view your credentials</p>
@@ -107,9 +125,15 @@ export default function MyCredentialsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header showNavLinks showCTAButtons showWalletButton />
+      <Header showNavLinks={false} showCTAButtons={false} showWalletButton />
       
       <main className="max-w-6xl mx-auto px-6 py-16">
+        <div className="mb-6">
+          <Button href="/candidate" variant="outline">
+            ← Back to Dashboard
+          </Button>
+        </div>
+        
         <h1 className="text-4xl font-bold text-slate-900 mb-2">My Credentials</h1>
         <p className="text-slate-600 mb-8">Manage your psychometric assessment credentials</p>
 
@@ -158,7 +182,7 @@ export default function MyCredentialsPage() {
                     <p className="text-sm text-slate-500">
                       Expires: {new Date(cred.expiry_at).toLocaleDateString()}
                     </p>
-                    {cred.blockchain_id && (
+                    {cred.blockchain_id !== null && (
                       <p className="text-sm text-slate-500 font-mono">
                         On-chain ID: #{cred.blockchain_id}
                       </p>
@@ -166,7 +190,7 @@ export default function MyCredentialsPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    {!cred.revoked && cred.status === 'minted' && (
+                    {!cred.revoked && cred.status === 'minted' && cred.blockchain_id !== null && (
                       <>
                         <Button
                           variant="outline"
@@ -183,6 +207,11 @@ export default function MyCredentialsPage() {
                           {revoking === cred.id ? 'Revoking...' : '🗑️ Revoke'}
                         </Button>
                       </>
+                    )}
+                    {!cred.revoked && cred.status === 'pending' && (
+                      <div className="text-sm text-amber-600">
+                        ⏳ Waiting for blockchain confirmation
+                      </div>
                     )}
                   </div>
                 </div>

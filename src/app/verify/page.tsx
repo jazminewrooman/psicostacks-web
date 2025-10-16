@@ -11,7 +11,7 @@ import { useWallet } from '@/contexts/wallet-context';
 
 interface CredentialPreview {
   blockchain_id: number;
-  candidate_email: string;
+  wallet_address: string;
   summary: {
     band: 'A' | 'B' | 'C';
   };
@@ -211,8 +211,10 @@ export default function VerifyPage() {
             )}
             <div className="space-y-4">
               <div className="flex justify-between items-center py-3 border-b border-slate-200">
-                <span className="text-slate-600 font-medium">Candidate</span>
-                <span className="text-slate-900">{credentialPreview.candidate_email}</span>
+                <span className="text-slate-600 font-medium">Candidate Wallet</span>
+                <span className="text-slate-900 font-mono text-sm">
+                  {credentialPreview.wallet_address.slice(0, 10)}...{credentialPreview.wallet_address.slice(-8)}
+                </span>
               </div>
               <div className="flex justify-between items-center py-3 border-b border-slate-200">
                 <span className="text-slate-600 font-medium">Assessment Band</span>

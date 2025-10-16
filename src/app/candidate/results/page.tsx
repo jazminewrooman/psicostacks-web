@@ -31,6 +31,7 @@ export default function ResultsPage() {
   const { stxAddress, isConnected } = useWallet();
   const [resultData, setResultData] = useState<ResultData | null>(null);
   const [isMinting, setIsMinting] = useState(false);
+  const [isWaitingConfirmation, setIsWaitingConfirmation] = useState(false);
   const [mintError, setMintError] = useState<string | null>(null);
   const [mintSuccess, setMintSuccess] = useState(false);
 
@@ -92,6 +93,7 @@ export default function ResultsPage() {
       console.log('Starting mint with:', { stxAddress, commitmentHash: resultData.credential.commitmentHash });
 
       // Call smart contract to mint SBT
+      setIsWaitingConfirmation(true);
       const mintResult = await mintCredentialOnChain({
         recipient: stxAddress,
         schema: 'psicostacks:v1',
@@ -101,20 +103,25 @@ export default function ResultsPage() {
 
       console.log('Mint result:', mintResult);
 
-      // Note: credentialId will be null until transaction confirms
-      // For MVP, we use a placeholder (0) and update it later when tx confirms
-      const blockchainId = mintResult.credentialId || 0;
-
       // Update backend with blockchain details
       const updateUrl = getBackendApiUrl(`/api/credentials/${resultData.credential.id}/mint`);
+      const updateData: any = {
+        sbtId: mintResult.txId,
+        txId: mintResult.txId,
+      };
+      
+      // Include blockchain_id only if we got it from the transaction
+      if (mintResult.credentialId !== null) {
+        updateData.blockchainId = mintResult.credentialId;
+        console.log('✅ Using real blockchain ID:', mintResult.credentialId);
+      } else {
+        console.log('⚠️ Blockchain ID not available yet - will remain null');
+      }
+      
       const response = await fetch(updateUrl, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sbtId: mintResult.txId,
-          txId: mintResult.txId,
-          blockchainId: blockchainId,
-        }),
+        body: JSON.stringify(updateData),
       });
 
       if (!response.ok) {
@@ -123,6 +130,8 @@ export default function ResultsPage() {
 
       const updated = await response.json();
       console.log('Updated credential:', updated);
+      
+      setIsWaitingConfirmation(false);
 
       // Update local state with minted status
       setResultData(prev => prev ? {
@@ -142,6 +151,7 @@ export default function ResultsPage() {
     } catch (error: any) {
       console.error('Error minting credential:', error);
       setMintError(error.message || 'Failed to mint credential on blockchain');
+      setIsWaitingConfirmation(false);
     } finally {
       setIsMinting(false);
     }
@@ -252,13 +262,25 @@ export default function ResultsPage() {
             </div>
           )}
 
+          {isWaitingConfirmation && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <div>
+                  <p className="text-sm font-semibold text-blue-900">⏳ Waiting for blockchain confirmation...</p>
+                  <p className="text-xs text-blue-700 mt-1">This may take 30-60 seconds. Please wait.</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {resultData.credential.status === 'pending' ? (
             <Button 
               onClick={handleMintCredential}
               disabled={!isConnected || isMinting}
               className={`w-full ${!isConnected || isMinting ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isMinting ? 'Minting...' : 'Mint Credential on Blockchain'}
+              {isMinting ? (isWaitingConfirmation ? 'Confirming on blockchain...' : 'Processing transaction...') : 'Mint Credential on Blockchain'}
             </Button>
           ) : (
             <Button 

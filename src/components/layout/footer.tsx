@@ -12,7 +12,7 @@ export const Footer: React.FC = () => (
           <a href="#cta" className="hover:text-slate-700 transition-colors">Get started</a>
         </div>
       </div>
-      <p className="mt-4">© {new Date().getFullYear()} PsicoStacks · Demo product for hackathon · No PII on-chain.</p>
+      <p className="mt-4">© {new Date().getFullYear()} PsicoStacks · No PII on-chain · Made with ❤️ from 🇲🇽</p>
     </div>
   </footer>
 );

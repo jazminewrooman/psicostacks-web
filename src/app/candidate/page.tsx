@@ -10,8 +10,7 @@ import { validatePDFFile } from '@/lib/pdf-utils';
 import { getBackendApiUrl } from '@/lib/api-config';
 
 export default function CandidatePage() {
-  const { isConnected } = useWallet();
-  const [email, setEmail] = useState('');
+  const { isConnected, stxAddress } = useWallet();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -62,16 +61,16 @@ export default function CandidatePage() {
   };
 
   const processAndSendPDF = async () => {
-    if (!selectedFile || !isConnected || !email) return;
+    if (!selectedFile || !isConnected || !stxAddress) return;
 
     setIsProcessing(true);
     setError(null);
 
     try {
-      // Create FormData to send file and email
+      // Create FormData to send file and wallet address
       const formData = new FormData();
       formData.append('file', selectedFile);
-      formData.append('email', email);
+      formData.append('walletAddress', stxAddress);
 
       // Send to backend for AI interpretation and credential creation
       const apiUrl = getBackendApiUrl('/api/ai-interpret');
@@ -112,6 +111,15 @@ export default function CandidatePage() {
           <p className="text-slate-600 text-lg max-w-2xl mx-auto mb-6">
             Upload your existing psychological assessment results or take our quick tests to create a verifiable, portable credential.
           </p>
+          
+          {/* My Credentials Button */}
+          {isConnected && (
+            <div className="flex justify-center gap-3 mb-6">
+              <Button href="/candidate/credentials" variant="outline">
+                📋 My Credentials
+              </Button>
+            </div>
+          )}
         </div>
 
         <div className="grid gap-8 md:grid-cols-2 mb-12">
@@ -121,21 +129,14 @@ export default function CandidatePage() {
               Have you already taken psychological assessments? Upload your results and we'll create a credential from them.
             </p>
             
-            {/* Email Input */}
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
-                Your Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="candidate@example.com"
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none"
-                disabled={!isConnected || isProcessing}
-              />
-            </div>
+            {/* Wallet Connected Notice */}
+            {isConnected && stxAddress && (
+              <div className="mb-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
+                <p className="text-sm text-violet-700">
+                  ✓ Wallet Connected: {stxAddress.slice(0, 8)}...{stxAddress.slice(-6)}
+                </p>
+              </div>
+            )}
             
             <input
               ref={fileInputRef}
@@ -180,13 +181,13 @@ export default function CandidatePage() {
 
             <Button 
               className={`w-full mt-4 ${
-                !isConnected || !selectedFile || !email || isProcessing 
+                !isConnected || !selectedFile || isProcessing 
                   ? 'opacity-50 cursor-not-allowed' 
                   : ''
               }`}
-              onClick={isConnected && selectedFile && email && !isProcessing ? processAndSendPDF : undefined}
+              onClick={isConnected && selectedFile && !isProcessing ? processAndSendPDF : undefined}
             >
-              {isProcessing ? 'Processing...' : selectedFile && email ? 'Process Report' : 'Complete Form'}
+              {isProcessing ? 'Processing...' : selectedFile ? 'Process Report' : 'Select PDF First'}
             </Button>
           </div>
 
