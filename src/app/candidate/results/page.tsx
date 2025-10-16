@@ -42,13 +42,15 @@ function ResultsPageContent() {
       try {
         const parsed = JSON.parse(decodeURIComponent(dataParam));
         setResultData(parsed);
-        // Store in session for refresh
-        sessionStorage.setItem('psicostacks_result', JSON.stringify(parsed));
+        // Store in session for refresh (only in browser)
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('psicostacks_result', JSON.stringify(parsed));
+        }
       } catch (e) {
         console.error('Error parsing result data:', e);
       }
-    } else {
-      // Try to load from session storage
+    } else if (typeof window !== 'undefined') {
+      // Try to load from session storage (only in browser)
       const stored = sessionStorage.getItem('psicostacks_result');
       if (stored) {
         setResultData(JSON.parse(stored));

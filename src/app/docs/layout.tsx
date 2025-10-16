@@ -12,6 +12,7 @@ const navigation = [
       { title: 'Introduction', href: '/docs' },
       { title: 'Quick Start', href: '/docs/quick-start' },
       { title: 'Installation', href: '/docs/installation' },
+      { title: 'Idea Validation', href: '/docs/validation' },
     ],
   },
   {
