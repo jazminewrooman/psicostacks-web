@@ -9,7 +9,7 @@ import { setVerificationFee, stxToMicroStx } from '@/lib/admin-functions';
  * Used to update contract settings like verification fee
  */
 export default function AdminPanel() {
-  const [feeInStx, setFeeInStx] = useState<number>(10);
+  const [feeInStx, setFeeInStx] = useState<number>(10); // Current fee: 10 STX
   const [loading, setLoading] = useState(false);
   const [txId, setTxId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

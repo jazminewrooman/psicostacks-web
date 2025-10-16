@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { getBackendApiUrl } from '@/lib/api-config';
 import { payVerificationFee } from '@/lib/stacks-contract';
 import { useWallet } from '@/contexts/wallet-context';
+import { WalletOnboarding } from '@/components/onboarding/wallet-onboarding';
+import { useOnboarding } from '@/hooks/use-onboarding';
 
 interface CredentialPreview {
   blockchain_id: number;
@@ -22,9 +24,11 @@ export default function VerifyPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { isConnected, stxAddress } = useWallet();
+  const { showOnboarding, isLoading: onboardingLoading, completeOnboarding, skipOnboarding } = useOnboarding('employer');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPaying, setIsPaying] = useState(false);
+  const [isWaitingConfirmation, setIsWaitingConfirmation] = useState(false);
   const [credentialPreview, setCredentialPreview] = useState<CredentialPreview | null>(null);
 
   const verifyToken = searchParams.get('token');
@@ -65,8 +69,14 @@ export default function VerifyPage() {
   };
 
   const handlePayAndVerify = async () => {
-    if (!verifyToken || !credentialPreview || !isConnected) {
+    if (!credentialPreview || !stxAddress) {
       setError('Please connect your wallet first');
+      return;
+    }
+    
+    // Validate blockchain_id
+    if (!credentialPreview.blockchain_id || credentialPreview.blockchain_id < 1) {
+      setError('Invalid credential: blockchain ID not found. The credential may not be properly minted.');
       return;
     }
 
@@ -76,8 +86,11 @@ export default function VerifyPage() {
     try {
       // Step 1: Pay verification fee on blockchain
       console.log('Calling smart contract to pay verification fee...');
+      console.log('Blockchain ID:', credentialPreview.blockchain_id);
+      setIsWaitingConfirmation(true);
       const txId = await payVerificationFee(credentialPreview.blockchain_id);
-      console.log('Payment transaction submitted:', txId);
+      console.log('Payment confirmed on blockchain:', txId);
+      setIsWaitingConfirmation(false);
 
       // Step 2: Call backend to generate view token
       const payUrl = getBackendApiUrl('/api/verify/pay');
@@ -108,10 +121,22 @@ export default function VerifyPage() {
     } catch (err: any) {
       console.error('Error during payment:', err);
       setError(err.message || 'Failed to process payment');
+      setIsWaitingConfirmation(false);
     } finally {
       setIsPaying(false);
     }
   };
+
+  // Show onboarding if needed (but not if still loading)
+  if (showOnboarding && !onboardingLoading && verifyToken) {
+    return (
+      <WalletOnboarding
+        userType="employer"
+        onComplete={completeOnboarding}
+        onSkip={skipOnboarding}
+      />
+    );
+  }
 
   if (!verifyToken) {
     return (
@@ -243,6 +268,22 @@ export default function VerifyPage() {
           </div>
         )}
 
+        {/* Confirmation Message */}
+        {isWaitingConfirmation && (
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 mb-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <h3 className="font-semibold text-blue-900">⏳ Waiting for payment confirmation...</h3>
+            </div>
+            <p className="text-sm text-blue-700 ml-8">
+              Your transaction is being confirmed on the blockchain. This may take 30-60 seconds.
+            </p>
+            <p className="text-xs text-blue-600 ml-8 mt-2">
+              Please do not close this window.
+            </p>
+          </div>
+        )}
+
         {/* Payment Button */}
         <div className="rounded-3xl border-2 border-violet-200 bg-violet-50 p-8 text-center">
           <h2 className="text-2xl font-bold text-slate-900 mb-4">Ready to Verify?</h2>
@@ -250,14 +291,14 @@ export default function VerifyPage() {
             Pay the verification fee to access the full credential details for 60 seconds
           </p>
           <p className="text-3xl font-bold text-violet-600 mb-6">
-            0.00001 STX <span className="text-sm text-slate-600">(~$0.0003 USD)</span>
+            10 STX <span className="text-sm text-slate-600">(~$3 USD)</span>
           </p>
           <Button 
             onClick={handlePayAndVerify}
             disabled={isPaying || !isConnected || !credentialPreview || isLoading}
             className={`w-full md:w-auto ${(!isConnected || !credentialPreview || isLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            {isPaying ? 'Processing Payment...' : '💰 Pay & Verify Credential'}
+            {isPaying ? (isWaitingConfirmation ? 'Confirming on blockchain...' : 'Processing payment...') : '💰 Pay & Verify Credential'}
           </Button>
           <p className="text-xs text-slate-500 mt-4">
             * Payment is processed on the Stacks blockchain. The fee goes to the credential issuer.

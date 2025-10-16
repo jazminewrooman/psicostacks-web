@@ -11,13 +11,13 @@ export function WalletButton() {
   if (isConnected && stxAddress) {
     return (
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-3 px-4 py-2 bg-green-50 border border-green-200 rounded-full">
-          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+        <div className="flex items-center gap-3 px-4 py-2 bg-violet-50 border border-violet-200  rounded-full">
+          <div className="w-2 h-2 bg-violet-500 rounded-full"></div>
           <div className="flex flex-col">
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-violet-700">
               {stxAddress.slice(0, 6)}...{stxAddress.slice(-4)}
             </span>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-violet-500">
               {stxBalance ? `${stxBalance} STX` : 'Loading...'}
             </span>
           </div>

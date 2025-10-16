@@ -5,10 +5,13 @@ import {
   uintCV,
   standardPrincipalCV,
   cvToJSON,
+  cvToValue,
+  deserializeCV,
 } from '@stacks/transactions';
 import { STACKS_TESTNET } from '@stacks/network';
 
-const STACKS_API_URL = process.env.NEXT_PUBLIC_STACKS_API_URL || 'https://api.testnet.hiro.so';
+// Use the network's API URL from STACKS_TESTNET instance
+const STACKS_API_URL = (STACKS_TESTNET as any).coreApiUrl || 'https://api.testnet.hiro.so';
 
 // Contract details (update these with your deployed contract)
 const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || 'ST2QS1D1ZFCGX436QPHACJNC0R2A6HNB7BNM95J9X';
@@ -71,15 +74,32 @@ async function waitForTransactionConfirmation(txId: string, maxAttempts = 30): P
  */
 function extractCredentialIdFromTx(txData: any): number {
   // The contract returns (ok uint), we need to parse it
-  // Format: "(ok u1)" or similar
   
-  if (txData.tx_result?.repr) {
-    const match = txData.tx_result.repr.match(/\(ok u(\d+)\)/);
-    if (match && match[1]) {
-      const id = parseInt(match[1]);
-      console.log(`✅ Extracted credential ID: ${id}`);
-      return id;
+  try {
+    // Method 1: Try to deserialize the hex result (most robust)
+    if (txData.tx_result?.hex) {
+      const clarityValue = deserializeCV(txData.tx_result.hex);
+      const value = cvToValue(clarityValue);
+      
+      // Value structure for (ok uint) is: { type: 'ok', value: bigint }
+      if (value && typeof value === 'object' && 'value' in value) {
+        const id = Number(value.value);
+        console.log(`✅ Extracted credential ID (from hex): ${id}`);
+        return id;
+      }
     }
+    
+    // Method 2: Fallback to parsing the string representation
+    if (txData.tx_result?.repr) {
+      const match = txData.tx_result.repr.match(/\(ok u(\d+)\)/);
+      if (match && match[1]) {
+        const id = parseInt(match[1]);
+        console.log(`✅ Extracted credential ID (from repr): ${id}`);
+        return id;
+      }
+    }
+  } catch (error) {
+    console.error('Error parsing credential ID:', error);
   }
   
   throw new Error('Could not extract credential ID from transaction result');
@@ -230,13 +250,30 @@ export async function payVerificationFee(blockchainId: number): Promise<string> 
       contractName: CONTRACT_NAME,
       functionName: 'verify-paid',
       functionArgs: [uintCV(blockchainId)],
+      postConditionMode: 0x01, // PostConditionMode.Allow - allows the contract to define conditions
       appDetails: {
         name: 'PsicoStacks',
         icon: window.location.origin + '/psicostacks-logo.png',
       },
-      onFinish: (data) => {
-        console.log('Verification payment transaction:', data);
-        resolve(data.txId);
+      onFinish: async (data) => {
+        console.log('Verification payment transaction broadcast:', data.txId);
+        
+        try {
+          // Wait for payment confirmation on blockchain (critical for security)
+          console.log('⏳ Waiting for payment confirmation...');
+          const txData = await waitForTransactionConfirmation(data.txId);
+          
+          // Verify transaction was successful
+          if (txData.tx_status === 'success') {
+            console.log('✅ Payment confirmed on blockchain');
+            resolve(data.txId);
+          } else {
+            throw new Error('Payment transaction failed');
+          }
+        } catch (error: any) {
+          console.error('❌ Payment confirmation failed:', error.message);
+          reject(error);
+        }
       },
       onCancel: () => {
         reject(new Error('Payment cancelled by user'));

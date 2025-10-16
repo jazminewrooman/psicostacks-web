@@ -27,6 +27,8 @@ export default function MyCredentialsPage() {
   const [credentials, setCredentials] = useState<Credential[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
+  const [sharingCredId, setSharingCredId] = useState<string | null>(null);
+  const [shareUrl, setShareUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (isConnected && stxAddress) {
@@ -50,6 +52,37 @@ export default function MyCredentialsPage() {
       console.error('Error fetching credentials:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleShare = async (credentialId: string) => {
+    setSharingCredId(credentialId);
+    
+    try {
+      const response = await fetch(getBackendApiUrl('/api/share'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          credentialId: credentialId,
+          ttlSec: 7200, // 2 hours
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate share link');
+      }
+      
+      const data = await response.json();
+      setShareUrl(data.url);
+      
+      // Copy to clipboard
+      await navigator.clipboard.writeText(data.url);
+      alert(`✅ Share link copied to clipboard!\n\nLink: ${data.url}\n\nValid for 2 hours.\n\nShare this with employers to let them verify your credential.`);
+    } catch (error: any) {
+      console.error('Error generating share link:', error);
+      alert('Failed to generate share link: ' + error.message);
+    } finally {
+      setSharingCredId(null);
     }
   };
 
@@ -135,7 +168,19 @@ export default function MyCredentialsPage() {
         </div>
         
         <h1 className="text-4xl font-bold text-slate-900 mb-2">My Credentials</h1>
-        <p className="text-slate-600 mb-8">Manage your psychometric assessment credentials</p>
+        <p className="text-slate-600 mb-4">Manage your psychometric assessment credentials</p>
+        
+        {/* Info Banner */}
+        <div className="bg-violet-50 border border-violet-200 rounded-xl p-4 mb-8">
+          <h3 className="font-semibold text-slate-900 mb-2">📤 How Sharing Works</h3>
+          <ul className="text-sm text-slate-700 space-y-1">
+            <li>• Click <strong>"📤 Share"</strong> to generate a unique verification link</li>
+            <li>• Each link is valid for <strong>2 hours</strong> and can be shared with any employer</li>
+            <li>• You can generate <strong>unlimited links</strong> - share with as many employers as you want</li>
+            <li>• Your credential stays active until you choose to revoke it</li>
+            <li>• Employers pay a verification fee (10 STX ≈ $3) to view your full report</li>
+          </ul>
+        </div>
 
         {loading ? (
           <div className="text-center py-12">
@@ -194,9 +239,10 @@ export default function MyCredentialsPage() {
                       <>
                         <Button
                           variant="outline"
-                          onClick={() => alert('Share functionality coming soon')}
+                          onClick={() => handleShare(cred.id)}
+                          disabled={sharingCredId === cred.id}
                         >
-                          📤 Share
+                          {sharingCredId === cred.id ? '⏳ Generating...' : '📤 Share'}
                         </Button>
                         <Button
                           variant="outline"

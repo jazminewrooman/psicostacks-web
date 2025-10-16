@@ -8,9 +8,12 @@ import { Check } from '@/components/ui/check';
 import { useWallet } from '@/contexts/wallet-context';
 import { validatePDFFile } from '@/lib/pdf-utils';
 import { getBackendApiUrl } from '@/lib/api-config';
+import { WalletOnboarding } from '@/components/onboarding/wallet-onboarding';
+import { useOnboarding } from '@/hooks/use-onboarding';
 
 export default function CandidatePage() {
   const { isConnected, stxAddress } = useWallet();
+  const { showOnboarding, isLoading: onboardingLoading, completeOnboarding, skipOnboarding } = useOnboarding('candidate');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -98,6 +101,17 @@ export default function CandidatePage() {
       setIsProcessing(false);
     }
   };
+
+  // Show onboarding if needed
+  if (showOnboarding && !onboardingLoading) {
+    return (
+      <WalletOnboarding
+        userType="candidate"
+        onComplete={completeOnboarding}
+        onSkip={skipOnboarding}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
