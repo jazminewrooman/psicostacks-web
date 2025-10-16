@@ -25,7 +25,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => (
   <header className="sticky top-0 z-10 border-b border-slate-100 bg-white/70 backdrop-blur">
     <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-      <Logo />
+      <Logo size={220} />
       
       {showNavLinks && (
         <nav className="hidden md:flex items-center gap-6 text-sm">
