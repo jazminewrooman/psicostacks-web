@@ -32,6 +32,7 @@ export const Header: React.FC<HeaderProps> = ({
           <a href="#how" className="text-slate-600 hover:text-slate-900 transition-colors">How it works</a>
           <a href="#benefits" className="text-slate-600 hover:text-slate-900 transition-colors">Benefits</a>
           <a href="#privacy" className="text-slate-600 hover:text-slate-900 transition-colors">Privacy</a>
+          <a href="/docs" className="text-slate-600 hover:text-slate-900 transition-colors">Docs</a>
         </nav>
       )}
 

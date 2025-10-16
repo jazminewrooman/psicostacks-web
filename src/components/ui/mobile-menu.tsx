@@ -52,6 +52,13 @@ export const MobileMenu: React.FC = () => {
               >
                 Privacy
               </a>
+              <a 
+                href="/docs" 
+                className="block text-slate-600 hover:text-slate-900 transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Docs
+              </a>
             </nav>
             <div className="pt-4 border-t border-slate-100 space-y-3">
               <Button href="#candidate" className="w-full">I&apos;m a Candidate</Button>
